@@ -1,0 +1,8 @@
+setup.py
+shoutlang/__init__.py
+shoutlang/cli.py
+shoutlang.egg-info/PKG-INFO
+shoutlang.egg-info/SOURCES.txt
+shoutlang.egg-info/dependency_links.txt
+shoutlang.egg-info/entry_points.txt
+shoutlang.egg-info/top_level.txt

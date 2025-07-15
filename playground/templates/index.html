@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoutLang Playground</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+    }
+
+    body {
+        background: #fff;
+        color: #222;
+        min-height: 100vh;
+    }
+
+    .container {
+        width: 100vw;
+        min-height: 100vh;
+        margin: 0;
+        background: #fff5f5;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+        border: none;
+        display: flex;
+        flex-direction: row;
+        gap: 0;
+    }
+
+    header {
+        background: linear-gradient(90deg, #d32f2f 0%, #ff5252 100%);
+        color: #fff;
+        padding: 24px 20px 16px 20px;
+        text-align: center;
+        letter-spacing: 1px;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        width: 100%;
+    }
+
+    header h1 {
+        font-size: 2.5em;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        margin-bottom: 10px;
+        letter-spacing: 2px;
+        color: #fff;
+        text-shadow: 0 2px 8px rgba(211,47,47,0.15);
+    }
+
+    .info-box {
+        background: #fff;
+        border-radius: 6px;
+        padding: 18px;
+        margin: 32px 0 0 0;
+        text-align: left;
+        color: #222;
+        border: 2px solid #d32f2f;
+        box-shadow: 0 0 4px #ff5252;
+        max-width: 320px;
+        min-width: 220px;
+        height: fit-content;
+    }
+
+    .info-box h2 {
+        margin-top: 10px;
+        font-size: 1.1em;
+        color: #d32f2f;
+    }
+
+    .info-box ul {
+        margin: 10px 0;
+        padding-left: 20px;
+    }
+
+    code {
+        background: #ffcdd2;
+        color: #d32f2f;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-weight: bold;
+        font-size: 1em;
+        letter-spacing: 1px;
+    }
+
+    .main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 32px;
+        gap: 32px;
+        background: none;
+    }
+    @media (min-width: 900px) {
+        .main {
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 32px;
+        }
+    }
+
+    .editor-container, .output-container {
+        flex: 1;
+        min-width: 320px;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 0 4px #ff5252;
+        padding: 20px;
+        border: 1px solid #d32f2f;
+    }
+
+    h2 {
+        margin-bottom: 12px;
+        border-bottom: 1px solid #ffcdd2;
+        padding-bottom: 4px;
+        color: #d32f2f;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-size: 1.3em;
+        letter-spacing: 1px;
+    }
+
+    #code-editor {
+        width: 100%;
+        height: 320px;
+        font-family: 'Fira Mono', 'Courier New', monospace;
+        font-size: 16px;
+        padding: 10px;
+        border: 1px solid #e3e3e3;
+        border-radius: 4px;
+        resize: vertical;
+        background: #fafafa;
+        color: #222;
+        box-shadow: none;
+        outline: none;
+        transition: border 0.2s;
+    }
+    #code-editor:focus {
+        border: 1.5px solid #1976d2;
+    }
+
+    .button-row {
+        margin-top: 14px;
+        display: flex;
+        gap: 14px;
+        justify-content: flex-end;
+    }
+
+    button {
+        padding: 8px 18px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        letter-spacing: 1px;
+        box-shadow: none;
+        background: #d32f2f;
+        color: #fff;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    #run-button {
+        background: #d32f2f;
+        color: #fff;
+    }
+    #run-button:hover {
+        background: #ff5252;
+        color: #fff;
+    }
+
+    #clear-button {
+        background: #ffcdd2;
+        color: #d32f2f;
+    }
+    #clear-button:hover {
+        background: #d32f2f;
+        color: #fff;
+    }
+
+    #output {
+        width: 100%;
+        height: 320px;
+        background: #fafafa;
+        color: #222;
+        border: 1px solid #e3e3e3;
+        border-radius: 4px;
+        padding: 10px;
+        overflow: auto;
+        white-space: pre-wrap;
+        font-family: 'Fira Mono', 'Courier New', monospace;
+        font-size: 16px;
+        box-shadow: none;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const codeEditor = document.getElementById('code-editor');
+    const output = document.getElementById('output');
+    const runButton = document.getElementById('run-button');
+    const clearButton = document.getElementById('clear-button');
+
+    // Run the code
+    runButton.addEventListener('click', function() {
+        const code = codeEditor.value;
+        output.textContent = 'Running...';
+        
+        fetch('/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code: code })
+        })
+        .then(response => response.json())
+        .then(data => {
+            output.textContent = data.output || 'No output';
+        })
+        .catch(error => {
+            output.textContent = 'Error: ' + error.message;
+        });
+    });
+
+    // Clear the editor and output
+    clearButton.addEventListener('click', function() {
+        codeEditor.value = '';
+        output.textContent = '';
+    });
+});
+</script>
+<body>
+    <div class="container">
+        <div class="info-box">
+            <h2>Modes:</h2>
+            <ul>
+                <li><strong>ANGRY</strong>: Only uppercase code works</li>
+                <li><strong>CALM</strong>: Only lowercase code works</li>
+                <li><strong>CHAOS</strong>: All operations double their effect</li>
+                <li><strong>NORMAL</strong>: Regular behavior</li>
+            </ul>
+            <h2>Commands:</h2>
+            <ul>
+                <li><code>MODE &lt;mode&gt;</code> - Set the interpreter mode</li>
+                <li><code>SET X=10</code> - Set variable X to value 10</li>
+                <li><code>ADD X 5</code> - Add 5 to variable X</li>
+                <li><code>SUB X 5</code> - Subtract 5 from variable X</li>
+                <li><code>MUL X 2</code> - Multiply variable X by 2</li>
+                <li><code>DIV X 2</code> - Divide variable X by 2</li>
+                <li><code>ADDV X Y</code> - Add the value of Y to X</li>
+                <li><code>SHOUT X</code> - Print the value of X</li>
+                <li><code>whisper x</code> - Print the value of X (in CALM mode)</li>
+            </ul>
+        </div>
+            <div style="flex:1;display:flex;flex-direction:column;">
+                <header style="width:100%;">
+                    <img src="shoutlang-7-15-2025.png" alt="ShoutLang Banner" style="width:100%;max-width:100vw;height:180px;object-fit:cover;display:block;margin-bottom:0;border-radius:0;box-shadow:0 2px 8px rgba(255,112,67,0.10);">
+                    <h1>SHOUTLANG PLAYGROUND</h1>
+                </header>
+                <div class="main">
+                    <div class="editor-container">
+                        <h2>CODE</h2>
+                        <textarea id="code-editor">SET A=10
+SET B=20
+SHOUT A
+SHOUT B
+ADD A 5
+SHOUT A</textarea>
+                        <div class="button-row">
+                            <button id="run-button">RUN CODE</button>
+                            <button id="clear-button">CLEAR</button>
+                        </div>
+                    </div>
+                    
+                    <div class="output-container">
+                        <h2>OUTPUT</h2>
+                        <pre id="output"></pre>
+                    </div>
+                </div>
+            </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
