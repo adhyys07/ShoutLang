@@ -1,0 +1,2 @@
+MODE NORMAL
+SHOUT("Here is the sum : ", MUL 5 10)
