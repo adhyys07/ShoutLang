@@ -94,7 +94,5 @@ MODE NORMAL  # Regular behavior
 ```shoutlang
 ! This is a comment
 ```
-
-
 ---
 Made with ❤️ by [adhyys07](https://github.com/adhyys07)
