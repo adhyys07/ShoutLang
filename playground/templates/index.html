@@ -294,6 +294,12 @@ SHOUT(ADD A 5)
     </div>
     <!-- ShoutLang Guide Section (full width, titled) -->
     <div style="margin: 40px auto 0 auto; max-width: 1200px; width: 98vw;">
+        <div style="display:flex;align-items:center;justify-content:center;margin-bottom:12px;gap:10px;">
+            <a href="#" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;gap:8px;">
+                <img src="{{ url_for('static', filename='github-mark.png') }}" alt="GitHub" style="width:32px;height:32px;vertical-align:middle;">
+                <span style="font-size:1.15em;color:#222;font-weight:bold;">View on GitHub</span>
+            </a>
+        </div>
         <h2 style="color:#d32f2f; font-size:2em; text-align:center; margin-bottom:28px; letter-spacing:2px; font-family:'Segoe UI','Arial',sans-serif;">ShoutLang Guide</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 24px; justify-content: center;">
             <div class="guide-container" style="flex:1 1 320px; min-width: 260px; max-width: 420px;">
@@ -301,15 +307,26 @@ SHOUT(ADD A 5)
                 <ul><li><b>SET VAR = VALUE</b> &mdash; Assign a value to a variable</li></ul>
                 <pre>SET A = 5
 SET NAME = "John"
-SET FL  = ""</pre>
+SET FL  = 1.5</pre>
             </div>
             <div class="guide-container" style="flex:1 1 320px; min-width: 260px; max-width: 420px;">
                 <h3>Math Operations</h3>
-                <ul><li><b>ADD/SUB/MUL/DIV VAR VALUE</b> &mdash; Perform Arithmetic Operations</li></ul>
-                <pre>ADD A 3
-SUB B 2
-MUL A 2
-DIV B 5</pre>
+                <ul>
+                    <li><b>ADD/SUB/MUL/DIV VAR VALUE</b> &mdash; Perform arithmetic operations on variables</li>
+                    <li><b>SET VAR = ADD X Y</b> &mdash; Assign result of arithmetic to a variable</li>
+                    <li>Variables and integers can be mixed in operations</li>
+                </ul>
+                <pre>SET A = 10
+SET B = 5
+ADD A 3         ! A becomes 13
+SUB B 2         ! B becomes 3
+MUL A B         ! A becomes 39 (13*3)
+DIV B 2         ! B becomes 1.5
+SET C = ADD A 7 ! C is 46 (39+7)
+SET D = MUL A B ! D is 58.5 (39*1.5)
+SET E = SUB D 10! E is 48.5
+SET F = DIV E 2 ! F is 24.25
+</pre>
             </div>
             <div class="guide-container" style="flex:1 1 320px; min-width: 260px; max-width: 420px;">
                 <h3>Printing & Output</h3>
