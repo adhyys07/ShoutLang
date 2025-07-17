@@ -1,6 +1,6 @@
 # ShoutLang
 
-A fun, expressive, and beginner-friendly programming language inspired by shouting! This project includes a custom interpreter and a web playground for experimenting with ShoutLang code.
+A fun, expressive, and beginner-friendly programming language inspired by shouting(rage !!) This project includes a custom interpreter and a web playground for experimenting with ShoutLang code.
 
 ![ShoutLang Banner](playground/static/shoutlang-7-15-2025.png)
 
