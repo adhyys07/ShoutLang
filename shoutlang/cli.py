@@ -1,7 +1,6 @@
 import sys
 import re
 
-# Constants
 VALID_OPS = ["ADD", "SUB", "MUL", "DIV", "DIVF", "MOD"]
 VALID_MODES = ["ANGRY", "CALM", "CHAOS", "NORMAL"]
 
@@ -177,37 +176,80 @@ def handle_math_operation(line, variables, mode):
 
     return True
 
-def handle_addv(line, variables, mode):
-    """Handle ADDV command."""
-    match = re.match(r'ADDV\s+([A-Z_]+)\s+([A-Z_]+)', line, re.IGNORECASE)
-    if not match:
+
+def evaluate_comparison(left, op, right, variables):
+    """Evaluate a comparison like A > 10 or B == C."""
+    left_val = get_value(left, variables)
+    right_val = get_value(right, variables)
+
+    if left_val is None or right_val is None:
+        print(f"Error: Invalid operands in comparison: {left} {op} {right}")
         return False
 
-    target = match.group(1).upper()
-    source = match.group(2).upper()
-
-    if not is_valid_variable_name(target) or not is_valid_variable_name(source):
-        print("Error: Invalid variable name")
-        return True
-
-    if target not in variables or source not in variables:
-        print("Error: One or both variables not defined")
-        return True
-
-    if not isinstance(variables[target], (int, float)) or not isinstance(variables[source], (int, float)):
-        print("Error: Both variables must contain numeric values for ADDV")
-        return True
-
-    multiplier = 2 if mode == "CHAOS" else 1
-    variables[target] += variables[source] * multiplier
-    return True
+    if op == "==":
+        return left_val == right_val
+    elif op == "!=":
+        return left_val != right_val
+    elif op == ">":
+        return left_val > right_val
+    elif op == "<":
+        return left_val < right_val
+    elif op == ">=":
+        return left_val >= right_val
+    elif op == "<=":
+        return left_val <= right_val
+    else:
+        print(f"Error: Unknown comparison operator '{op}'")
+        return False
 
 def handle_shout(line, variables, mode):
-    """Handle all SHOUT variants with multiple arguments."""
+   
+    comp_match = re.match(
+        r'SHOUT\s*\(\s*"?(.*?)"?\s*,?\s*([A-Z_][A-Z_0-9]*|[0-9]+(?:\.[0-9]+)?)\s*(==|!=|>|<|>=|<=)\s*([A-Z_][A-Z_0-9]*|[0-9]+(?:\.[0-9]+)?)\s*\)',
+        line, re.IGNORECASE
+    )
+    if comp_match:
+        message = comp_match.group(1).strip()
+        left = comp_match.group(2)
+        op = comp_match.group(3)
+        right = comp_match.group(4)
+        def parse_token(token):
+            token = token.strip()
+            if is_valid_variable_name(token.upper()) and token.upper() in variables:
+                return variables[token.upper()]
+            try:
+                if '.' in token:
+                    return float(token)
+                return int(token)
+            except ValueError:
+                return token
+        left_val = parse_token(left)
+        right_val = parse_token(right)
+        result = False
+        try:
+            if op == "==":
+                result = left_val == right_val
+            elif op == "!=":
+                result = left_val != right_val
+            elif op == ">":
+                result = left_val > right_val
+            elif op == "<":
+                result = left_val < right_val
+            elif op == ">=":
+                result = left_val >= right_val
+            elif op == "<=":
+                result = left_val <= right_val
+        except Exception:
+            result = False
+        if message:
+            print(f'{message} {"YESSS" if result else "NOOO"}')
+        else:
+            print("YESSS" if result else "NOOO")
+        return True
+
     paren_match = re.match(r'SHOUT\s*\((.*?)\)', line, re.IGNORECASE)
     if paren_match:
         content = paren_match.group(1).strip()
-        # Split arguments by comma, but ignore commas inside quotes
         args = re.findall(r'"[^"]*"|[^,]+', content)
         output_parts = []
         for arg in args:
@@ -215,7 +257,6 @@ def handle_shout(line, variables, mode):
             # String literal
             if arg.startswith('"') and arg.endswith('"'):
                 output_parts.append(arg[1:-1])
-            # Math expression
             elif re.match(r'(ADD|SUB|MUL|DIV|DIVF|MOD)\s+(\S+)\s+(\S+)', arg, re.IGNORECASE):
                 math_match = re.match(r'(ADD|SUB|MUL|DIV|DIVF|MOD)\s+(\S+)\s+(\S+)', arg, re.IGNORECASE)
                 op = math_match.group(1).upper()
@@ -224,14 +265,14 @@ def handle_shout(line, variables, mode):
                 result = handle_math_expr(op, left, right, variables, mode)
                 if result is not None:
                     output_parts.append(str(result))
-            # Variable
+    
             elif is_valid_variable_name(arg.upper()):
                 var_name = arg.upper()
                 if var_name in variables:
                     output_parts.append(str(variables[var_name]))
                 else:
                     output_parts.append(f"[Undefined: {var_name}]")
-            # Number literal
+        
             else:
                 try:
                     if '.' in arg:
@@ -263,8 +304,7 @@ def handle_whisper(line, variables):
     return True
 
 def handle_amplify(line, variables):
-    """Handle AMPLIFY command."""
-    match = re.match(r'AMPLIFY\s+([A-Z_]+)$', line, re.IGNORECASE)
+    match = re.match(r'AMPLIFY\s*\(\s*([A-Z_]+)\s*\)$', line, re.IGNORECASE)
     if not match:
         return False
 
@@ -290,7 +330,6 @@ def handle_amplify(line, variables):
     return True
 
 def handle_getinput(line, variables):
-    """Handle standalone WHATT command."""
     match = re.match(r'WHATT\s+([A-Z_]+)$', line, re.IGNORECASE)
     if not match:
         return False
@@ -314,7 +353,6 @@ def run_line(line, variables, mode):
     if not line or line.startswith('!'):
         return mode
 
-    # MODE command (process before case restrictions)
     mode_match = re.match(r'MODE\s+(\w+)', line, re.IGNORECASE)
     if mode_match:
         new_mode = mode_match.group(1).upper()
@@ -324,21 +362,17 @@ def run_line(line, variables, mode):
             print(f"Error: Invalid mode '{new_mode}'")
             return mode
 
-    # Check mode restrictions
     if mode == "ANGRY" and not line.isupper():
         return mode
     if mode == "CALM" and not line.islower():
         return mode
 
-    # SET command
     if re.match(r'SET\s+', line, re.IGNORECASE):
         handle_set(line, variables, mode)
         return mode
 
-    # Try other commands
+
     if handle_math_operation(line, variables, mode):
-        return mode
-    if handle_addv(line, variables, mode):
         return mode
     if handle_shout(line, variables, mode):
         return mode

@@ -1,2 +1,1 @@
-MODE NORMAL
-SHOUT("Here is the sum : ", MUL 5 10)
+SET A = WHATT("WHAT IS YOUR NAME?")
