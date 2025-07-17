@@ -95,12 +95,6 @@ MODE NORMAL  # Regular behavior
 ! This is a comment
 ```
 
-## 📚 More
-- See the [playground guide](playground/templates/index.html) for more examples and details.
-- For deployment on Render, see `playground/requirements.txt`, `Procfile`, and `render.yaml`.
-
-## 📝 License
-MIT License
 
 ---
 Made with ❤️ by [adhyys07](https://github.com/adhyys07)
